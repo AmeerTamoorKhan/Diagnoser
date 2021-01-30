@@ -1,9 +1,7 @@
 import pandas as pd
 import re
 import Testing as model
-from PIL import Image, ImageTk
 import streamlit as st
-import numpy as np
 
 st.set_page_config(page_title='Diagnoser', page_icon="\U0001fa7a", layout='wide', initial_sidebar_state='auto')
 
@@ -15,33 +13,6 @@ def text_preprocessing(text):
     text = re.sub(r"\((.*?)\)", '', text)
 
     return text
-
-
-symptoms = pd.read_csv('data/Symptom-severity.csv')
-symptoms = symptoms.iloc[:, 0]
-symptoms = symptoms.values
-
-
-for i in range(len(symptoms)):
-    symptoms[i] = text_preprocessing(symptoms[i])
-
-symptoms = sorted(symptoms)
-
-#************************************** GUI *************************************
-col1, col2, col3, col4, col5, col6 = st.beta_columns(6)
-with col1:
-    st.image('Images/Logo1.png', width=100)
-with col2:
-    st.title('Diagnoser')
-
-
-selected_symptoms = st.sidebar.multiselect('Select the Symptoms', symptoms)
-
-enter = st.sidebar.button('Enter')
-
-st.sidebar.markdown('''<h3>Created By: Ameer Tamoor Khan</h3>
-                    <h4>Github : <a href="https://github.com/AmeerTamoorKhan" target="_blank">Click Here </a></h4> 
-                    <h4>Email: drop-in@atkhan.info</h4> ''', unsafe_allow_html=True)
 
 
 def default():
@@ -66,22 +37,71 @@ def display(Disease, Precaution):
     st.write('4)', Precaution[3])
 
 
-def analyzer(symptoms):
-    Disease, Precaution = model.model(symptoms)
-    return Disease, Precaution
+def about():
+    st.header('Working Demonstration:')
+    st.video('images/diagnoser.mp4')
+    st.header('How It Works:')
+    st.markdown('''
+    Diagnoser is a fun Machine Learning project to diagnose the disease based on the symptoms.\n
+    The tested diseases along with the symptoms are on the right text file. The dataset consists of 41 diseases with 17
+    symptoms max. The total dataset comprises 5000 samples. The accuracy is around 90% (Validation/Test data). Along
+    with the diagnosis of the disease, some basic precautions are also provided. The model is made of LSTM and Dense 
+    layers.\n
+    <strong>#LSTM #neuralnetworks #machinelearning #DiagnoserDiagnoser </strong>
+    ''', unsafe_allow_html=True)
+
+symptoms = pd.read_csv('data/Symptom-severity.csv')
+symptoms = symptoms.iloc[:, 0]
+symptoms = symptoms.values
 
 
-if enter:
-    Disease, Precaution = analyzer(selected_symptoms)
-    display(Disease, Precaution)
-else:
-    default()
+for i in range(len(symptoms)):
+    symptoms[i] = text_preprocessing(symptoms[i])
+
+symptoms = sorted(symptoms)
+st.sidebar.header('Welcome To Diagnoser')
+options = ['About', 'Diagnoser']
+radio = st.sidebar.radio('Select', options)
+
+st.sidebar.markdown('''<h3>Created By: Ameer Tamoor Khan</h3>
+                    <h4>Github : <a href="https://github.com/AmeerTamoorKhan" target="_blank">Click Here </a></h4> 
+                    <h4>Email: drop-in@atkhan.info</h4> ''', unsafe_allow_html=True)
+#************************************** GUI *************************************
+col1, col2, col3, col4, col5, col6 = st.beta_columns(6)
+with col1:
+    st.image('Images/Logo1.png', width=100)
+with col2:
+    st.title('Diagnoser')
 
 
-reset = st.button('Reset')
+if radio == options[1]:
+    st.empty()
+    selected_symptoms = st.multiselect('Select the Symptoms', symptoms)
 
-if reset:
-    st.sidebar.empty()
+    enter = st.button('Enter')
+
+
+    def analyzer(symptoms):
+        Disease, Precaution = model.model(symptoms)
+        return Disease, Precaution
+
+
+    if enter:
+        Disease, Precaution = analyzer(selected_symptoms)
+        display(Disease, Precaution)
+    else:
+        default()
+
+    reset = st.button('Reset')
+
+    if reset:
+        st.sidebar.empty()
+elif radio == options[0]:
+    st.empty()
+    about()
+
+
+
 
 
 
